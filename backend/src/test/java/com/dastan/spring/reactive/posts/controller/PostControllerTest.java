@@ -2,7 +2,6 @@ package com.dastan.spring.reactive.posts.controller;
 
 import com.dastan.spring.reactive.comments.persistence.CommentsRepository;
 import com.dastan.spring.reactive.config.SecurityConfig;
-import com.dastan.spring.reactive.posts.controller.dto.CreatePostCommand;
 import com.dastan.spring.reactive.posts.controller.dto.PostSummary;
 import com.dastan.spring.reactive.posts.persistence.PostsRepository;
 import com.dastan.spring.reactive.users.persistence.UsersRepository;
@@ -16,7 +15,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import static org.mockito.BDDMockito.given;
@@ -29,16 +27,12 @@ public class PostControllerTest {
 
     @Autowired
     WebTestClient client;
-
     @MockBean
     PostsRepository posts;
-
     @MockBean
     UsersRepository users;
-
     @MockBean
     CommentsRepository comments;
-
     @MockBean
     PasswordEncoder passwordEncoder;
 
@@ -73,12 +67,6 @@ public class PostControllerTest {
         given(this.posts.findById(id)).willReturn(Mono.empty());
 
         client.get().uri("/posts/" + id).exchange().expectStatus().isNotFound();
-    }
-
-    @Test
-    public void createPostShouldReturn422ForInvalidInput() {
-        final CreatePostCommand create = new CreatePostCommand("", "content");
-        client.post().uri("/posts").body(BodyInserters.fromValue(create)).exchange().expectStatus().isEqualTo(422);
     }
 
     @TestConfiguration

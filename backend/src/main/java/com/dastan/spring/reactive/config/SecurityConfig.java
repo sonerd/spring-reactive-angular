@@ -50,18 +50,12 @@ public class SecurityConfig {
                    .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                    .logout(ServerHttpSecurity.LogoutSpec::disable)
                    .securityContextRepository(serverSecurityContextRepository)
-                   .authorizeExchange(it -> it.pathMatchers("/", "/login", "/logout")
-                                              .permitAll()
-                                              .pathMatchers(HttpMethod.GET, "/posts/**")
-                                              .permitAll()
-                                              .pathMatchers(HttpMethod.DELETE, "/posts/**")
-                                              .hasRole("ADMIN")
-                                              .pathMatchers("/posts/**")
-                                              .authenticated()
-                                              .pathMatchers("/auth/**")
-                                              .authenticated()
-                                              .pathMatchers("/users/{user}/**")
-                                              .access(this::currentUserMatchesPath)
+                   .authorizeExchange(it -> it.pathMatchers("/", "/login", "/logout").permitAll()
+                                              .pathMatchers(HttpMethod.GET, "/posts/**").permitAll()
+                                              .pathMatchers(HttpMethod.DELETE, "/posts/**").hasRole("ADMIN")
+                                              .pathMatchers("/posts/**").authenticated()
+                                              .pathMatchers("/auth/**").authenticated()
+                                              .pathMatchers("/users/{user}/**").access(this::currentUserMatchesPath)
                                               .anyExchange()
                                               .permitAll())
                    .addFilterAt(loginFilter, SecurityWebFiltersOrder.AUTHENTICATION)
@@ -136,16 +130,19 @@ public class SecurityConfig {
 
     @Bean
     public ReactiveUserDetailsService userDetailsService(UsersRepository users) {
-        return username -> users.findByUsername(username)
-                        .map(u -> User.withUsername(u.getUsername())
-                                  .password(u.getPassword())
-                                  .authorities(u.getRoles().toArray(new String[0]))
-                                  .accountExpired(!u.isActive())
-                                  .credentialsExpired(!u.isActive())
-                                  .disabled(!u.isActive())
-                                  .accountLocked(!u.isActive())
-                                  .build())
-                        .switchIfEmpty(Mono.error(new UsernameNotFoundException(username)));
+        return username -> {
+            final Mono<com.dastan.spring.reactive.users.domain.User> user = users.findByUsername(username);
+            return user
+                            .map(u -> User.withUsername(u.getUsername())
+                                      .password(u.getPassword())
+                                      .authorities(u.getRoles().toArray(new String[0]))
+                                      .accountExpired(!u.isActive())
+                                      .credentialsExpired(!u.isActive())
+                                      .disabled(!u.isActive())
+                                      .accountLocked(!u.isActive())
+                                      .build())
+                            .switchIfEmpty(Mono.error(new UsernameNotFoundException(username)));
+        };
 
     }
 }
