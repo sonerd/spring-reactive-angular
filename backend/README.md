@@ -1,7 +1,12 @@
 # The backend of the sample project which uses Spring Boot Reactive with mongoDB
 ### 
 
+The tests are based on:
+* simple unit tests with mocking
+* integration tests with testcontainter
+* end2end tests with cucumber
 
+Before running the cucumber tests inside `src/end2endTest` you have to start the mongoDB docker container with: `docker-compose up`  
 
 ### Guides for the used techstack
 The following guides illustrate how to use some features concretely:
